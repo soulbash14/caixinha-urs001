@@ -28,7 +28,9 @@
       <input type="text" id="user" class="form-control bg-secondary text-white border-0 mb-2" placeholder="Usuário">
       <input type="password" id="pass" class="form-control bg-secondary text-white border-0 mb-3" placeholder="Senha">
 
-      <button onclick="App.login()" class="btn btn-primary w-100 mb-3">ENTRAR</button>
+      <button onclick="App.login()" class="btn btn-primary w-100 mb-3">
+        ENTRAR
+      </button>
 
       <div class="text-center small">
         <a href="#" onclick="App.show('view-cadastro')" class="text-info d-block mb-1 text-decoration-none">
@@ -42,13 +44,26 @@
 
     <!-- DASHBOARD -->
     <div id="view-dash" class="hidden text-center">
+
       <h5 class="mb-4">
         Membro: <span id="txt-nome" class="text-info"></span>
       </h5>
 
-      <div class="bg-secondary p-3 rounded mb-4">
+      <div class="bg-secondary p-3 rounded mb-3">
         <small class="d-block mb-1">COTAS ADQUIRIDAS</small>
         <h2 id="txt-saldo" class="m-0 fw-bold">0</h2>
+      </div>
+
+      <!-- SELETOR DE TEMA (AGORA NO LUGAR CERTO) -->
+      <div class="mb-4 text-start">
+        <small class="text-muted d-block mb-1">Tema</small>
+        <select onchange="App.setTheme(this.value)" class="form-select">
+          <option value="theme-dark">Dark</option>
+          <option value="theme-light">Light</option>
+          <option value="theme-blue">Blue</option>
+          <option value="theme-green">Green</option>
+          <option value="theme-purple">Purple</option>
+        </select>
       </div>
 
       <button
@@ -133,16 +148,8 @@
   <!-- JS -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="script.js"></script>
-  <select onchange="App.setTheme(this.value)" class="form-select mt-3">
-  <option value="theme-dark">Dark</option>
-  <option value="theme-light">Light</option>
-  <option value="theme-blue">Blue</option>
-  <option value="theme-green">Green</option>
-  <option value="theme-purple">Purple</option>
-</select>
 
 </body>
 </html>
-
 
 
