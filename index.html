@@ -3,116 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Membros - urs_001</title>
-    
+    <title>Sistema urs_001</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-    <div id="loader">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Carregando...</span>
-        </div>
-    </div>
+    <div id="loader">Carregando...</div>
 
     <div class="container d-flex justify-content-center align-items-center min-vh-100">
-        
-        <div class="card shadow-lg p-4 w-100" style="max-width: 400px; border-radius: 20px;">
+        <div class="card shadow p-4 w-100" style="max-width: 450px; border-radius: 20px;">
             
-            <div class="text-center mb-4">
-                <div class="mb-2">
-                    <i class="fas fa-user-shield fa-3x text-primary"></i>
+            <div id="view-login">
+                <h4 class="text-center fw-bold mb-4">Login</h4>
+                <input type="text" id="user" class="form-control mb-2" placeholder="Usuário">
+                <input type="password" id="pass" class="form-control mb-3" placeholder="Senha">
+                <button onclick="App.login()" class="btn btn-primary w-100 mb-3">Entrar</button>
+                <div class="text-center">
+                    <a href="#" onclick="App.show('view-cadastro')" class="small d-block">Primeiro Acesso</a>
                 </div>
-                <h4 class="fw-bold">Acesso ao Membro</h4>
-                <small class="text-muted">ID Pattern: urs_001</small>
             </div>
 
-            <div id="view-login">
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">Usuário</label>
-                    <input type="text" id="user" class="form-control" placeholder="Seu usuário">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">Senha</label>
-                    <input type="password" id="pass" class="form-control" placeholder="Sua senha">
-                </div>
-                <button onclick="App.login()" class="btn btn-primary w-100 mb-3 py-2 fw-bold">Entrar</button>
-                
-                <div class="text-center">
-                    <a href="javascript:void(0)" onclick="App.show('view-cadastro')" class="d-block small text-decoration-none mb-2">Primeiro Acesso?</a>
-                    <a href="javascript:void(0)" onclick="App.show('view-esqueci')" class="text-muted small text-decoration-none">Esqueci minha senha</a>
-                </div>
+            <div id="view-adm" class="hidden">
+                <h5 class="fw-bold mb-3">Painel Administrativo</h5>
+                <p class="small text-muted">Pré-cadastro de novos membros</p>
+                <input type="text" id="adm-nome" class="form-control mb-2" placeholder="Nome Completo">
+                <input type="text" id="adm-cpf" class="form-control mb-2" placeholder="CPF (Apenas números)">
+                <input type="number" id="adm-cotas" class="form-control mb-2" placeholder="Quantidade de Cotas">
+                <select id="adm-nivel" class="form-select mb-3">
+                    <option value="Membro">Membro</option>
+                    <option value="Administrador">Administrador</option>
+                </select>
+                <button onclick="App.preCadastrar()" class="btn btn-success w-100 mb-2">Cadastrar Membro</button>
+                <button onclick="App.show('view-dash')" class="btn btn-light w-100">Voltar ao Painel</button>
             </div>
 
             <div id="view-cadastro" class="hidden">
-                <h6 class="fw-bold mb-3">Primeiro Acesso</h6>
-                <p class="small text-muted">Informe seu CPF para validar seu cadastro na base.</p>
-                <div class="mb-3">
-                    <input type="text" id="reg-cpf" class="form-control" placeholder="000.000.000-00">
-                </div>
-                <button onclick="App.validarCPF()" class="btn btn-primary w-100 mb-2">Validar CPF</button>
-                <button onclick="App.show('view-login')" class="btn btn-light w-100">Voltar</button>
+                <h5 class="fw-bold mb-3">Primeiro Acesso</h5>
+                <input type="text" id="reg-cpf" class="form-control mb-3" placeholder="Digite seu CPF">
+                <button onclick="App.validarCPF()" class="btn btn-primary w-100 mb-2">Verificar Cadastro</button>
+                <button onclick="App.show('view-login')" class="btn btn-light w-100">Sair</button>
             </div>
 
             <div id="view-finalizar" class="hidden">
-                <h6 class="fw-bold mb-3">Finalizar Cadastro</h6>
-                <div class="alert alert-info py-2 small" id="msg-boas-vindas"></div>
-                
+                <h5 id="msg-boas-vindas" class="small fw-bold text-primary"></h5>
                 <input type="hidden" id="reg-linha">
-
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">Crie um Usuário</label>
-                    <input type="text" id="reg-user" class="form-control" placeholder="Ex: joao123">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">Crie uma Senha</label>
-                    <input type="password" id="reg-pass" class="form-control" placeholder="******">
-                </div>
-                <button onclick="App.salvar()" class="btn btn-success w-100 mb-2">Salvar Acesso</button>
-            </div>
-
-            <div id="view-esqueci" class="hidden">
-                <h6 class="fw-bold mb-3">Recuperar Senha</h6>
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">Digite seu CPF</label>
-                    <input type="text" id="esc-cpf" class="form-control" placeholder="000.000.000-00">
-                </div>
-                <button onclick="App.recuperar()" class="btn btn-primary w-100 mb-2">Ver Senha</button>
-                <button onclick="App.show('view-login')" class="btn btn-light w-100">Voltar</button>
+                <input type="text" id="reg-user" class="form-control mb-2" placeholder="Crie seu Usuário">
+                <input type="password" id="reg-pass" class="form-control mb-3" placeholder="Crie sua Senha">
+                <button onclick="App.salvar()" class="btn btn-success w-100">Concluir</button>
             </div>
 
             <div id="view-dash" class="hidden">
-                <div class="text-center mb-4">
-                    <h5 class="mb-0">Bem-vindo, <span id="txt-nome" class="text-primary fw-bold">...</span></h5>
-                    <p class="small text-muted">Aqui estão suas informações</p>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="m-0">Olá, <span id="txt-nome"></span></h5>
+                    <span id="badge-nivel" class="badge bg-secondary">Membro</span>
                 </div>
-
-                <div class="card bg-light border-0 p-3 text-center mb-4">
-                    <small class="text-uppercase fw-bold text-muted">Saldo Atual</small>
-                    <h2 class="fw-bold text-dark m-0" id="txt-saldo">R$ 0,00</h2>
+                <div class="card bg-light p-3 text-center mb-3">
+                    <small>SALDO EM COTAS</small>
+                    <h2 id="txt-saldo">0</h2>
                 </div>
-
-                <div class="historico-area">
-                    <h6 class="fw-bold small mb-2"><i class="fas fa-history me-2"></i>Últimas Movimentações</h6>
-                    <div class="table-responsive">
-                        <table class="table table-sm table-hover" style="font-size: 0.8rem;">
-                            <thead>
-                                <tr>
-                                    <th>Data</th>
-                                    <th>Valor</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabela-corpo">
-                                </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <button onclick="location.reload()" class="btn btn-outline-danger btn-sm w-100 mt-3">Sair</button>
+                
+                <button id="btn-menu-adm" onclick="App.show('view-adm')" class="btn btn-warning w-100 mb-2 hidden">Menu do Administrador</button>
+                
+                <button onclick="location.reload()" class="btn btn-outline-danger w-100">Sair</button>
             </div>
 
         </div>
