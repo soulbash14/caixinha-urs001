@@ -1,7 +1,6 @@
 const App = {
+
   apiUrl: 'https://script.google.com/macros/s/AKfycbznslD7v9yiZP6aqZ8797Su7HGbWPtNwkH8cSh0yz118JoCGuUtjgwoI5qkGEvZDU8/exec',
-  …
-};
 
   /* =========================
      REQUEST PADRÃO
@@ -157,6 +156,49 @@ const App = {
     document.getElementById('adm-nome').value = '';
     document.getElementById('adm-cpf').value = '';
     document.getElementById('adm-cotas').value = '';
+  },
+
+  /* =========================
+     ESQUECI SENHA
+  ========================= */
+  async resetarSenha() {
+    const cpf = document.getElementById('esc-cpf').value;
+
+    if (!cpf) {
+      return this.alert('Erro', 'Informe o CPF', 'warning');
+    }
+
+    const res = await this.request('resetarSenha', { cpf });
+
+    if (!res.sucesso) {
+      return this.alert('Erro', res.msg, 'error');
+    }
+
+    this.alert('Sucesso', res.msg, 'success');
+    this.show('view-login');
+  },
+
+  /* =========================
+     TEMAS
+  ========================= */
+  setTheme(theme) {
+    const body = document.body;
+    body.className = body.className.replace(/theme-\w+/g, '').trim();
+    body.classList.add(theme);
+    localStorage.setItem('urs_theme', theme);
+  },
+
+  loadTheme() {
+    const theme = localStorage.getItem('urs_theme') || 'theme-dark';
+    document.body.classList.add(theme);
   }
 
 };
+
+/* =========================
+   INIT
+========================= */
+document.addEventListener('DOMContentLoaded', () => {
+  App.loadTheme();
+});
+
