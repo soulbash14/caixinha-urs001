@@ -1,1 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Caixinha - Samuel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root { --primary: #2563eb; --bg: #f8fafc; }
+        body { background-color: var(--bg); font-family: 'Inter', sans-serif; }
+        .auth-card { max-width: 400px; margin: 80px auto; border: none; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .btn-primary { background-color: var(--primary); border: none; padding: 12px; border-radius: 10px; }
+        .form-control { padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; }
+        #loader-global { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); 
+                         display: none; justify-content: center; align-items: center; z-index: 9999; }
+        .sidebar { width: 260px; height: 100vh; background: #1e293b; color: white; position: fixed; }
+        .main-content { margin-left: 260px; padding: 30px; }
+        @media (max-width: 768px) { .sidebar { display: none; } .main-content { margin-left: 0; } }
+    </style>
+</head>
+<body>
+
+    <div id="loader-global"><div class="spinner-border text-primary"></div></div>
+
+    <div id="view-login" class="container">
+        <div class="card auth-card p-4">
+            <div class="text-center mb-4">
+                <h3 class="fw-bold text-primary">Caixinha urs_001</h3>
+                <p class="text-muted">Entre com suas credenciais</p>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Usuário</label>
+                <input type="text" id="user" class="form-control" placeholder="Seu username">
+            </div>
+            <div class="mb-4">
+                <label class="form-label">Senha</label>
+                <input type="password" id="pass" class="form-control" placeholder="••••••••">
+            </div>
+            <button class="btn btn-primary w-100 mb-3" onclick="handleLogin()">Acessar Sistema</button>
+            <div class="d-flex justify-content-between">
+                <a href="#" class="text-decoration-none small" onclick="switchView('view-cpf')">Primeiro Acesso</a>
+                <a href="#" class="text-decoration-none small text-danger" onclick="handleReset()">Esqueci Senha</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-cpf" class="container" style="display:none;">
+        <div class="card auth-card p-4 text-center">
+            <h4 class="fw-bold">Validar Cadastro</h4>
+            <p class="text-muted mb-4">Digite seu CPF para continuar</p>
+            <input type="text" id="cpfInput" class="form-control mb-3" placeholder="000.000.000-00">
+            <button class="btn btn-dark w-100 mb-2" onclick="handleValidarCpf()">Verificar CPF</button>
+            <button class="btn btn-link btn-sm text-muted" onclick="switchView('view-login')">Voltar ao Login</button>
+        </div>
+    </div>
+
+    <div id="view-dash" style="display:none;">
+        <div class="sidebar d-flex flex-column p-3">
+            <h4 class="text-center fw-bold mb-4">CAIXINHA</h4>
+            <hr>
+            <nav class="nav flex-column gap-2">
+                <a class="nav-link text-white active" href="#"><i class="bi bi-grid-1x2 me-2"></i> Início</a>
+                <a id="menu-adm" class="nav-link text-warning d-none" href="#"><i class="bi bi-shield-lock me-2"></i> Painel ADM</a>
+            </nav>
+            <button class="btn btn-outline-danger mt-auto" onclick="location.reload()">Sair do Sistema</button>
+        </div>
+        <div class="main-content">
+            <header class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold" id="txt-welcome">Bem-vindo</h2>
+                <div class="badge bg-primary p-2" id="badge-nivel">Membro</div>
+            </header>
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="card p-3 border-0 shadow-sm text-center">
+                        <h6 class="text-muted">Saldo Caixinha</h6>
+                        <h3 class="fw-bold text-success">R$ 0,00</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- COLE AQUI A URL DO SEU GOOGLE APPS SCRIPT (IMPLANTADO COMO APP DA WEB) ---
+        const URL_API ='https://script.google.com/macros/s/AKfycbyMyZlCjxCCEgkVomZHfz1BCxmw6sTWyiDmoMWmonsCpQNRsv8nVryCx3g3TU6jDWwY/exec';
+
+        function switchView(id) {
+            ['view-login', 'view-cpf', 'view-dash'].forEach(v => document.getElementById(v).style.display = 'none');
+            document.getElementById(id).style.display = 'block';
+        }
+
+        async function callServer(action, payload) {
+            document.getElementById('loader-global').style.display = 'flex';
+            try {
+                const response = await fetch(URL_API, {
+                    method: 'POST',
+                    body: JSON.stringify({ action, payload })
+                });
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                alert('Erro na comunicação: ' + error);
+            } finally {
+                document.getElementById('loader-global').style.display = 'none';
+            }
+        }
+
+        async function handleLogin() {
+            const user = document.getElementById('user').value;
+            const pass = document.getElementById('pass').value;
+            const res = await callServer('login', { user, pass });
+            if(res.sucesso) {
+                document.getElementById('txt-welcome').innerText = 'Olá, ' + res.nome;
+                if(res.nivel == 1) document.getElementById('menu-adm').classList.remove('d-none');
+                switchView('view-dash');
+            } else { alert(res.msg); }
+        }
+
+        async function handleValidarCpf() {
+            const cpf = document.getElementById('cpfInput').value;
+            const res = await callServer('validarCpf', { cpf });
+            if(res.sucesso) {
+                const u = prompt("Escolha um Username:");
+                const s = prompt("Escolha uma Senha:");
+                if(u && s) {
+                    const saveRes = await callServer('salvar', { linha: res.linha, u, s });
+                    alert(saveRes.msg);
+                    location.reload();
+                }
+            } else { alert(res.msg); }
+        }
+    </script>
+</body>
+</html>
 
