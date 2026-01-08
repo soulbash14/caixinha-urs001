@@ -7,7 +7,7 @@ const App = {
     // A forma certa: Ele tenta ler a variável da Vercel, se for undefined, usa o link reserva.
     apiUrl: (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_API_URL) 
             ? process.env.NEXT_PUBLIC_API_URL 
-            : 'https://script.google.com/macros/s/AKfycbzX6Rv-0zJplG_-_6_djYq1aUVSfG5Iw6Dv0HiZPUCmoYhvAurg9ztRqJR1KMizU3tn/exec',
+            : 'https://script.google.com/macros/s/AKfycbwHOvRL8j9EgNTqeyTHoHfqdG64AU1jZlgakxnvido/dev',
 
     // Controlador de Requisições com Tratamento de Erros Profissional
     async request(action, payload) {
