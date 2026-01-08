@@ -1,111 +1,82 @@
-/**
- * SISTEMA MVC PROFISSIONAL - urs_001
- * Frontend Conectado ao Controller Google Apps Script
- */
-
 const App = {
-    // Sua URL oficial (/exec)
     apiUrl: 'https://script.google.com/macros/s/AKfycbznslD7v9yiZP6aqZ8797Su7HGbWPtNwkH8cSh0yz118JoCGuUtjgwoI5qkGEvZDU8/exec',
 
-    // Central de Comunicação
     async request(action, payload) {
-        document.getElementById('loader').style.display = 'flex';
+        document.getElementById('loader').style.display = 'block';
         try {
-            const response = await fetch(this.apiUrl, {
-                method: 'POST',
-                body: JSON.stringify({ action, payload })
-            });
-            const res = await response.json();
-            return res;
+            const response = await fetch(this.apiUrl, { method: 'POST', body: JSON.stringify({ action, payload }) });
+            return await response.json();
         } catch (e) {
-            console.error("Erro na API:", e);
-            this.aviso("Erro de Conexão", "Não foi possível falar com o servidor Google.", "error");
-            return { sucesso: false };
+            return { sucesso: false, msg: "Erro de conexão" };
         } finally {
             document.getElementById('loader').style.display = 'none';
         }
     },
 
-    // Notificações
-    aviso(titulo, texto, icone = 'info') {
-        Swal.fire({
-            title: titulo,
-            text: texto,
-            icon: icone,
-            confirmButtonColor: '#2563eb'
-        });
-    },
-
-    // Controle de Telas
-    show(id) {
-        const views = ['view-login', 'view-cadastro', 'view-finalizar', 'view-esqueci', 'view-dash'];
-        views.forEach(v => {
-            const el = document.getElementById(v);
-            if(el) el.classList.add('hidden');
-        });
-        document.getElementById(id).classList.remove('hidden');
-    },
-
-    // --- LÓGICA DE LOGIN ---
     async login() {
-        const u = document.getElementById('user').value;
-        const p = document.getElementById('pass').value;
-        if (!u || !p) return this.aviso("Atenção", "Preencha usuário e senha.", "warning");
+        const res = await this.request('login', { 
+            user: document.getElementById('user').value, 
+            pass: document.getElementById('pass').value 
+        });
 
-        const res = await this.request('login', { user: u, pass: p });
-        if (res && res.sucesso) {
+        if (res.sucesso) {
             document.getElementById('txt-nome').innerText = res.nome;
-            document.getElementById('txt-saldo').innerText = "R$ " + res.saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            document.getElementById('txt-saldo').innerText = res.saldo; // Saldo ou Cotas
+            document.getElementById('badge-nivel').innerText = res.nivel;
+
+            // REGRA: Se for Administrador, mostra o botão do Menu ADM
+            if(res.nivel === 'Administrador') {
+                document.getElementById('btn-menu-adm').classList.remove('hidden');
+            }
+
             this.show('view-dash');
         } else {
-            this.aviso("Erro", res.msg || "Dados inválidos.", "error");
+            Swal.fire("Erro", res.msg, "error");
         }
     },
 
-    // --- LÓGICA DE CADASTRO (PRIMEIRO ACESSO) ---
-    async validarCPF() {
-        const cpf = document.getElementById('reg-cpf').value;
-        if (!cpf) return this.aviso("Atenção", "Informe o CPF para validar.", "warning");
+    async preCadastrar() {
+        const payload = {
+            nome: document.getElementById('adm-nome').value,
+            cpf: document.getElementById('adm-cpf').value,
+            cotas: document.getElementById('adm-cotas').value,
+            nivel: document.getElementById('adm-nivel').value
+        };
 
-        const res = await this.request('validarCpf', { cpf: cpf });
-        if (res && res.sucesso) {
-            document.getElementById('msg-boas-vindas').innerText = "Olá " + res.nome + ", agora crie seu acesso:";
-            // Guarda a linha num campo oculto para usar no salvamento
+        const res = await this.request('preCadastrar', payload);
+        if(res.sucesso) {
+            Swal.fire("Sucesso", "Membro pré-cadastrado com ID: " + res.id, "success");
+            // Limpa campos
+            document.getElementById('adm-nome').value = "";
+            document.getElementById('adm-cpf').value = "";
+        }
+    },
+
+    async validarCPF() {
+        const res = await this.request('validarCpf', { cpf: document.getElementById('reg-cpf').value });
+        if(res.sucesso) {
+            document.getElementById('msg-boas-vindas').innerText = "Bem-vindo " + res.nome + "!";
             document.getElementById('reg-linha').value = res.linha;
             this.show('view-finalizar');
         } else {
-            this.aviso("Ops!", res.msg, "error");
+            Swal.fire("Atenção", res.msg, "warning");
         }
     },
 
     async salvar() {
-        const u = document.getElementById('reg-user').value;
-        const s = document.getElementById('reg-pass').value;
-        const l = document.getElementById('reg-linha').value;
-
-        if (!u || !s) return this.aviso("Atenção", "Defina um usuário e senha.", "warning");
-
-        const res = await this.request('salvar', { linha: l, u: u, s: s });
-        if (res && res.sucesso) {
-            Swal.fire("Sucesso!", res.msg, "success").then(() => {
-                this.show('view-login');
-            });
-        } else {
-            this.aviso("Erro", "Não foi possível salvar o cadastro.", "error");
+        const res = await this.request('salvar', {
+            linha: document.getElementById('reg-linha').value,
+            u: document.getElementById('reg-user').value,
+            s: document.getElementById('reg-pass').value
+        });
+        if(res.sucesso) {
+            Swal.fire("Pronto!", "Acesso criado!", "success").then(() => location.reload());
         }
     },
 
-    // --- LÓGICA DE ESQUECI A SENHA ---
-    async recuperar() {
-        const cpf = document.getElementById('esc-cpf').value;
-        if (!cpf) return this.aviso("Atenção", "Digite seu CPF.", "warning");
-
-        const res = await this.request('esqueciSenha', { cpf: cpf });
-        if (res && res.sucesso) {
-            this.aviso("Recuperado!", res.msg, "success");
-            this.show('view-login');
-        } else {
-            this.aviso("Erro", res.msg, "error");
-        }
+    show(id) {
+        const views = ['view-login', 'view-cadastro', 'view-finalizar', 'view-dash', 'view-adm'];
+        views.forEach(v => document.getElementById(v)?.classList.add('hidden'));
+        document.getElementById(id).classList.remove('hidden');
     }
 };
