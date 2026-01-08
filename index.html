@@ -3,62 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Caixinha MVC - urs_001</title>
+    <title>Sistema de Membros - urs_001</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="loader"><div class="spinner-border text-light"></div></div>
 
-    <div class="card shadow">
-        <div id="view-login">
-            <h3 class="fw-bold text-primary mb-4 text-center">Login</h3>
-            <input type="text" id="user" class="form-control mb-2" placeholder="Usuário">
-            <input type="password" id="pass" class="form-control mb-3" placeholder="Senha">
-            <button class="btn btn-primary w-100 mb-3" onclick="App.login()">ENTRAR</button>
-            <div class="d-flex justify-content-between">
-                <button class="btn btn-link btn-sm p-0 text-decoration-none" onclick="App.show('view-cadastro')">Primeiro Acesso</button>
-                <button class="btn btn-link btn-sm p-0 text-decoration-none text-danger" onclick="App.show('view-esqueci')">Esqueci Senha</button>
-            </div>
-        </div>
-
-        <div id="view-cadastro" class="hidden">
-            <h3 class="fw-bold text-success mb-3">Cadastro</h3>
-            <input type="text" id="reg-cpf" class="form-control mb-3" placeholder="CPF (apenas números)">
-            <button class="btn btn-success w-100 mb-2" onclick="App.validarCPF()">Verificar CPF</button>
-            <button class="btn btn-link btn-sm w-100" onclick="App.show('view-login')">Voltar</button>
-        </div>
-
-        <div id="view-finalizar" class="hidden">
-            <h3 class="fw-bold text-primary mb-3">Dados de Acesso</h3>
-            <p id="msg-boas-vindas" class="text-muted small"></p>
-            <input type="hidden" id="reg-linha">
-            <input type="text" id="reg-user" class="form-control mb-2" placeholder="Usuário">
-            <input type="password" id="reg-pass" class="form-control mb-3" placeholder="Senha">
-            <button class="btn btn-primary w-100" onclick="App.salvar()">Concluir</button>
-        </div>
-
-        <div id="view-esqueci" class="hidden">
-            <h3 class="fw-bold text-danger mb-3">Recuperar</h3>
-            <input type="text" id="esc-cpf" class="form-control mb-3" placeholder="Digite seu CPF">
-            <button class="btn btn-danger w-100 mb-2" onclick="App.recuperar()">Recuperar</button>
-            <button class="btn btn-link btn-sm w-100" onclick="App.show('view-login')">Voltar</button>
-        </div>
-
-        <div id="view-dash" class="hidden text-center">
-            <h4 class="fw-bold mb-0">Olá, <span id="txt-nome" class="text-primary"></span></h4>
-            <hr>
-            <div class="p-4 bg-light rounded mb-3">
-                <small class="text-muted">Seu Saldo</small>
-                <h2 class="text-success fw-bold" id="txt-saldo">R$ 0,00</h2>
-            </div>
-            <button class="btn btn-outline-danger btn-sm w-100" onclick="location.reload()">SAIR</button>
+    <div id="loader">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Carregando...</span>
         </div>
     </div>
 
+    <div class="container d-flex justify-content-center align-items-center min-vh-100">
+        
+        <div class="card shadow-lg p-4 w-100" style="max-width: 400px; border-radius: 20px;">
+            
+            <div class="text-center mb-4">
+                <div class="mb-2">
+                    <i class="fas fa-user-shield fa-3x text-primary"></i>
+                </div>
+                <h4 class="fw-bold">Acesso ao Membro</h4>
+                <small class="text-muted">ID Pattern: urs_001</small>
+            </div>
+
+            <div id="view-login">
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Usuário</label>
+                    <input type="text" id="user" class="form-control" placeholder="Seu usuário">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Senha</label>
+                    <input type="password" id="pass" class="form-control" placeholder="Sua senha">
+                </div>
+                <button onclick="App.login()" class="btn btn-primary w-100 mb-3 py-2 fw-bold">Entrar</button>
+                
+                <div class="text-center">
+                    <a href="javascript:void(0)" onclick="App.show('view-cadastro')" class="d-block small text-decoration-none mb-2">Primeiro Acesso?</a>
+                    <a href="javascript:void(0)" onclick="App.show('view-esqueci')" class="text-muted small text-decoration-none">Esqueci minha senha</a>
+                </div>
+            </div>
+
+            <div id="view-cadastro" class="hidden">
+                <h6 class="fw-bold mb-3">Primeiro Acesso</h6>
+                <p class="small text-muted">Informe seu CPF para validar seu cadastro na base.</p>
+                <div class="mb-3">
+                    <input type="text" id="reg-cpf" class="form-control" placeholder="000.000.000-00">
+                </div>
+                <button onclick="App.validarCPF()" class="btn btn-primary w-100 mb-2">Validar CPF</button>
+                <button onclick="App.show('view-login')" class="btn btn-light w-100">Voltar</button>
+            </div>
+
+            <div id="view-finalizar" class="hidden">
+                <h6 class="fw-bold mb-3">Finalizar Cadastro</h6>
+                <div class="alert alert-info py-2 small" id="msg-boas-vindas"></div>
+                
+                <input type="hidden" id="reg-linha">
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Crie um Usuário</label>
+                    <input type="text" id="reg-user" class="form-control" placeholder="Ex: joao123">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Crie uma Senha</label>
+                    <input type="password" id="reg-pass" class="form-control" placeholder="******">
+                </div>
+                <button onclick="App.salvar()" class="btn btn-success w-100 mb-2">Salvar Acesso</button>
+            </div>
+
+            <div id="view-esqueci" class="hidden">
+                <h6 class="fw-bold mb-3">Recuperar Senha</h6>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Digite seu CPF</label>
+                    <input type="text" id="esc-cpf" class="form-control" placeholder="000.000.000-00">
+                </div>
+                <button onclick="App.recuperar()" class="btn btn-primary w-100 mb-2">Ver Senha</button>
+                <button onclick="App.show('view-login')" class="btn btn-light w-100">Voltar</button>
+            </div>
+
+            <div id="view-dash" class="hidden">
+                <div class="text-center mb-4">
+                    <h5 class="mb-0">Bem-vindo, <span id="txt-nome" class="text-primary fw-bold">...</span></h5>
+                    <p class="small text-muted">Aqui estão suas informações</p>
+                </div>
+
+                <div class="card bg-light border-0 p-3 text-center mb-4">
+                    <small class="text-uppercase fw-bold text-muted">Saldo Atual</small>
+                    <h2 class="fw-bold text-dark m-0" id="txt-saldo">R$ 0,00</h2>
+                </div>
+
+                <div class="historico-area">
+                    <h6 class="fw-bold small mb-2"><i class="fas fa-history me-2"></i>Últimas Movimentações</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover" style="font-size: 0.8rem;">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Valor</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-corpo">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <button onclick="location.reload()" class="btn btn-outline-danger btn-sm w-100 mt-3">Sair</button>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="script.js"></script>
 </body>
 </html>
