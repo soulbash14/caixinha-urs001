@@ -1,69 +1,113 @@
-/* DESIGN urs_001 - MODERNO */
+/* =========================
+   BASE
+========================= */
 body {
-    background: radial-gradient(circle, #1e293b 0%, #0f172a 100%);
-    color: #334155;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+  transition: background 0.3s, color 0.3s;
 }
+
+.hidden { display: none !important; }
 
 .card {
-    background: #ffffff;
-    border-radius: 24px;
-    width: 100%;
-    max-width: 400px;
-    padding: 35px;
-    border: none;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border-radius: 18px;
+  max-width: 400px;
+  width: 100%;
+  border: none;
+  padding: 30px;
+  transition: background 0.3s;
 }
 
-.hidden {
-    display: none !important;
+/* =========================
+   COMPONENTES
+========================= */
+.form-control,
+.form-select {
+  border-radius: 10px;
+  padding: 12px;
 }
 
-.form-control {
-    border-radius: 12px;
-    padding: 12px;
-    border: 1px solid #e2e8f0;
-    margin-bottom: 10px;
-    background-color: #f8fafc;
-}
-
-.form-control:focus {
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-    border-color: #2563eb;
-}
-
-.btn-primary {
-    background: #2563eb;
-    border: none;
-    border-radius: 12px;
-    padding: 14px;
-    font-weight: 600;
-    transition: all 0.3s;
-}
-
-.btn-primary:hover {
-    background: #1d4ed8;
-    transform: translateY(-1px);
-}
+.btn { border-radius: 10px; font-weight: 600; }
 
 #loader {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(15, 23, 42, 0.8);
-    backdrop-filter: blur(4px);
-    z-index: 9999;
-    justify-content: center;
-    align-items: center;
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+  justify-content: center;
+  align-items: center;
 }
 
-/* Customização SweetAlert */
-.swal2-popup {
-    border-radius: 20px !important;
-    font-family: 'Inter', sans-serif !important;
+/* =========================
+   THEME DARK (PADRÃO)
+========================= */
+.theme-dark {
+  background: radial-gradient(circle, #1e293b 0%, #0f172a 100%);
+  color: #e5e7eb;
 }
+
+.theme-dark .card {
+  background: #111827;
+  box-shadow: 0 25px 50px -12px rgba(0,0,0,.6);
+}
+
+.theme-dark .form-control {
+  background: #1f2937;
+  color: #e5e7eb;
+}
+
+.theme-dark .btn-primary { background: #2563eb; }
+
+/* =========================
+   THEME LIGHT
+========================= */
+.theme-light {
+  background: #f8fafc;
+  color: #1f2937;
+}
+
+.theme-light .card {
+  background: #ffffff;
+  box-shadow: 0 10px 20px rgba(0,0,0,.1);
+}
+
+.theme-light .form-control {
+  background: #f1f5f9;
+  color: #1f2937;
+}
+
+.theme-light .btn-primary { background: #2563eb; }
+
+/* =========================
+   THEME BLUE
+========================= */
+.theme-blue {
+  background: linear-gradient(135deg, #0f172a, #1e3a8a);
+  color: #e5e7eb;
+}
+
+.theme-blue .card { background: #020617; }
+.theme-blue .btn-primary { background: #3b82f6; }
+
+/* =========================
+   THEME GREEN
+========================= */
+.theme-green {
+  background: linear-gradient(135deg, #052e16, #14532d);
+  color: #ecfdf5;
+}
+
+.theme-green .card { background: #022c22; }
+.theme-green .btn-primary { background: #22c55e; }
+
+/* =========================
+   THEME PURPLE
+========================= */
+.theme-purple {
+  background: linear-gradient(135deg, #2e1065, #4c1d95);
+  color: #f5f3ff;
+}
+
+.theme-purple .card { background: #1e1b4b; }
+.theme-purple .btn-primary { background: #8b5cf6; }
