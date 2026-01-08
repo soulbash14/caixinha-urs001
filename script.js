@@ -202,3 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
   App.loadTheme();
 });
 
+/* =========================
+   EXPOSE GLOBAL (IMPORTANTE)
+========================= */
+window.App = App;
