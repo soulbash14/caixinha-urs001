@@ -1,11 +1,13 @@
 /**
  * SISTEMA MVC PROFISSIONAL - urs_001
- * Status: Link estável /exec + Dashboard com Histórico
+ * Frontend Conectado ao Controller Google Apps Script
  */
 
 const App = {
+    // Sua URL oficial (/exec)
     apiUrl: 'https://script.google.com/macros/s/AKfycbznslD7v9yiZP6aqZ8797Su7HGbWPtNwkH8cSh0yz118JoCGuUtjgwoI5qkGEvZDU8/exec',
 
+    // Central de Comunicação
     async request(action, payload) {
         document.getElementById('loader').style.display = 'flex';
         try {
@@ -13,17 +15,18 @@ const App = {
                 method: 'POST',
                 body: JSON.stringify({ action, payload })
             });
-            if (!response.ok) throw new Error("Erro na rede");
-            return await response.json();
+            const res = await response.json();
+            return res;
         } catch (e) {
-            console.error("Erro de conexão:", e);
-            this.aviso("Erro de Conexão", "Servidor indisponível.", "error");
+            console.error("Erro na API:", e);
+            this.aviso("Erro de Conexão", "Não foi possível falar com o servidor Google.", "error");
             return { sucesso: false };
         } finally {
             document.getElementById('loader').style.display = 'none';
         }
     },
 
+    // Notificações
     aviso(titulo, texto, icone = 'info') {
         Swal.fire({
             title: titulo,
@@ -33,14 +36,17 @@ const App = {
         });
     },
 
+    // Controle de Telas
     show(id) {
         const views = ['view-login', 'view-cadastro', 'view-finalizar', 'view-esqueci', 'view-dash'];
-        views.forEach(v => document.getElementById(v)?.classList.add('hidden'));
+        views.forEach(v => {
+            const el = document.getElementById(v);
+            if(el) el.classList.add('hidden');
+        });
         document.getElementById(id).classList.remove('hidden');
     },
 
-    // --- FUNÇÕES DE INTERAÇÃO ---
-
+    // --- LÓGICA DE LOGIN ---
     async login() {
         const u = document.getElementById('user').value;
         const p = document.getElementById('pass').value;
@@ -50,43 +56,21 @@ const App = {
         if (res && res.sucesso) {
             document.getElementById('txt-nome').innerText = res.nome;
             document.getElementById('txt-saldo').innerText = "R$ " + res.saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-            
-            // Busca o histórico após o login
-            await this.carregarHistorico(res.nome);
-            
             this.show('view-dash');
         } else {
             this.aviso("Erro", res.msg || "Dados inválidos.", "error");
         }
     },
 
-    async carregarHistorico(nomeMembro) {
-        const res = await this.request('historico', { nome: nomeMembro });
-        const corpoTabela = document.getElementById('tabela-corpo');
-        if(!corpoTabela) return;
-
-        corpoTabela.innerHTML = ""; // Limpa tabela
-
-        if (res.sucesso && res.lista.length > 0) {
-            res.lista.forEach(item => {
-                corpoTabela.innerHTML += `
-                    <tr>
-                        <td>${item.data}</td>
-                        <td>R$ ${item.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                        <td><span class="badge ${item.status === 'Pago' ? 'bg-success' : 'bg-warning'}">${item.status}</span></td>
-                    </tr>
-                `;
-            });
-        } else {
-            corpoTabela.innerHTML = "<tr><td colspan='3' class='text-muted'>Nenhum registro encontrado.</td></tr>";
-        }
-    },
-
+    // --- LÓGICA DE CADASTRO (PRIMEIRO ACESSO) ---
     async validarCPF() {
         const cpf = document.getElementById('reg-cpf').value;
+        if (!cpf) return this.aviso("Atenção", "Informe o CPF para validar.", "warning");
+
         const res = await this.request('validarCpf', { cpf: cpf });
         if (res && res.sucesso) {
-            document.getElementById('msg-boas-vindas').innerText = "Olá " + res.nome + ", crie seu acesso:";
+            document.getElementById('msg-boas-vindas').innerText = "Olá " + res.nome + ", agora crie seu acesso:";
+            // Guarda a linha num campo oculto para usar no salvamento
             document.getElementById('reg-linha').value = res.linha;
             this.show('view-finalizar');
         } else {
@@ -98,21 +82,30 @@ const App = {
         const u = document.getElementById('reg-user').value;
         const s = document.getElementById('reg-pass').value;
         const l = document.getElementById('reg-linha').value;
+
+        if (!u || !s) return this.aviso("Atenção", "Defina um usuário e senha.", "warning");
+
         const res = await this.request('salvar', { linha: l, u: u, s: s });
         if (res && res.sucesso) {
-            this.aviso("Sucesso!", "Cadastro realizado!", "success");
-            this.show('view-login');
+            Swal.fire("Sucesso!", res.msg, "success").then(() => {
+                this.show('view-login');
+            });
+        } else {
+            this.aviso("Erro", "Não foi possível salvar o cadastro.", "error");
         }
     },
 
+    // --- LÓGICA DE ESQUECI A SENHA ---
     async recuperar() {
         const cpf = document.getElementById('esc-cpf').value;
+        if (!cpf) return this.aviso("Atenção", "Digite seu CPF.", "warning");
+
         const res = await this.request('esqueciSenha', { cpf: cpf });
         if (res && res.sucesso) {
             this.aviso("Recuperado!", res.msg, "success");
             this.show('view-login');
         } else {
-            this.aviso("Erro", res.msg || "CPF não encontrado.", "error");
+            this.aviso("Erro", res.msg, "error");
         }
     }
 };
