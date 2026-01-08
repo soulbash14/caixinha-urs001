@@ -5,12 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema Caixinha - urs_001</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        body { background: #1a202c; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-        .card { background: white; color: #333; padding: 30px; border-radius: 20px; width: 100%; max-width: 380px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        body { background: #1a202c; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .card { background: white; color: #333; padding: 30px; border-radius: 20px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
         .hidden { display: none; }
         .btn-primary { background: #2563eb; width: 100%; padding: 12px; font-weight: bold; border: none; margin-top: 10px; }
+        .btn-success { width: 100%; padding: 12px; font-weight: bold; }
         #loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; justify-content: center; align-items: center; }
+        .user-badge { background: #e2e8f0; padding: 10px; border-radius: 10px; margin-bottom: 20px; text-align: center; }
     </style>
 </head>
 <body>
@@ -19,7 +22,7 @@
     <div class="card">
         <div id="box-login">
             <h2 class="text-primary fw-bold">Login</h2>
-            <p class="text-muted small">Acesse sua conta</p>
+            <p class="text-muted small">Acesse o sistema da Caixinha</p>
             <input type="text" id="user" class="form-control mb-2" placeholder="Usuário">
             <input type="password" id="pass" class="form-control mb-3" placeholder="Senha">
             <button class="btn btn-primary" onclick="fazerLogin()">ENTRAR</button>
@@ -29,29 +32,51 @@
 
         <div id="box-cadastro" class="hidden">
             <h2 class="text-success fw-bold">Cadastro</h2>
-            <p class="text-muted small">Digite seu CPF para validar</p>
-            <input type="text" id="reg-cpf" class="form-control mb-3" placeholder="CPF (apenas números)">
-            <button class="btn btn-success w-100" onclick="validarCPF()">VERIFICAR CPF</button>
+            <p class="text-muted small">Valide seu CPF para começar</p>
+            <input type="text" id="reg-cpf" class="form-control mb-3" placeholder="CPF (somente números)">
+            <button class="btn btn-success" onclick="validarCPF()">VERIFICAR CPF</button>
             <button class="btn btn-link btn-sm w-100 mt-2" onclick="trocarTela('box-login')">Voltar ao Login</button>
         </div>
 
         <div id="box-finalizar" class="hidden">
-            <h2 class="text-primary fw-bold">Quase lá!</h2>
+            <h2 class="text-primary fw-bold">Dados de Acesso</h2>
             <p id="msg-boas-vindas" class="text-muted small"></p>
             <input type="hidden" id="reg-linha">
-            <input type="text" id="reg-user" class="form-control mb-2" placeholder="Crie um Usuário">
-            <input type="password" id="reg-pass" class="form-control mb-3" placeholder="Crie uma Senha">
-            <button class="btn btn-primary" onclick="salvarDados()">CONCLUIR CADASTRO</button>
+            <input type="text" id="reg-user" class="form-control mb-2" placeholder="Escolha um Usuário">
+            <input type="password" id="reg-pass" class="form-control mb-3" placeholder="Escolha uma Senha">
+            <button class="btn btn-primary" onclick="salvarDados()">CONCLUIR</button>
+        </div>
+
+        <div id="box-dashboard" class="hidden text-center">
+            <div class="user-badge">
+                <i class="bi bi-person-circle fs-1 text-primary"></i>
+                <h5 id="nome-usuario" class="mt-2 fw-bold mb-0">---</h5>
+                <span class="badge bg-primary">Membro Ativo</span>
+            </div>
+            
+            <div class="row g-2 mb-3">
+                <div class="col-12">
+                    <div class="p-3 border rounded bg-light">
+                        <small class="text-muted d-block">Saldo Disponível</small>
+                        <h3 class="fw-bold text-success mb-0">R$ 0,00</h3>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-outline-secondary btn-sm w-100 mb-2">Ver Minhas Rifas</button>
+            <button class="btn btn-outline-danger btn-sm w-100" onclick="location.reload()">Sair do Sistema</button>
         </div>
     </div>
 
     <script>
+        // Mantenha sua URL sempre correta aqui
         const API = 'https://script.google.com/macros/s/AKfycbzX6Rv-0zJplG_-_6_djYq1aUVSfG5Iw6Dv0HiZPUCmoYhvAurg9ztRqJR1KMizU3tn/exec';
 
         function trocarTela(id) {
             document.getElementById('box-login').classList.add('hidden');
             document.getElementById('box-cadastro').classList.add('hidden');
             document.getElementById('box-finalizar').classList.add('hidden');
+            document.getElementById('box-dashboard').classList.add('hidden');
             document.getElementById(id).classList.remove('hidden');
         }
 
@@ -61,7 +86,7 @@
                 const response = await fetch(API, { method: 'POST', body: JSON.stringify(dados) });
                 return await response.json();
             } catch (e) {
-                alert("Erro de conexão!");
+                alert("Erro de conexão com o servidor!");
                 return { sucesso: false };
             } finally {
                 document.getElementById('loader').style.display = 'none';
@@ -69,20 +94,33 @@
         }
 
         async function fazerLogin() {
+            const u = document.getElementById('user').value;
+            const p = document.getElementById('pass').value;
+            
+            if(!u || !p) return alert("Preencha os campos!");
+
             const res = await chamarAPI({
                 action: 'login',
-                payload: { user: document.getElementById('user').value, pass: document.getElementById('pass').value }
+                payload: { user: u, pass: p }
             });
-            if(res.sucesso) alert("Bem-vindo, " + res.nome);
-            else alert(res.msg);
+
+            if(res.sucesso) {
+                // Preenche o nome do usuário na tela e troca de tela
+                document.getElementById('nome-usuario').innerText = res.nome;
+                trocarTela('box-dashboard');
+            } else {
+                alert(res.msg);
+            }
         }
 
         async function validarCPF() {
             const cpf = document.getElementById('reg-cpf').value;
+            if(!cpf) return alert("Digite o CPF!");
+
             const res = await chamarAPI({ action: 'validarCpf', payload: { cpf: cpf } });
             
             if(res.sucesso) {
-                document.getElementById('msg-boas-vindas').innerText = "Olá " + res.nome + ", defina seus dados de acesso:";
+                document.getElementById('msg-boas-vindas').innerText = "Olá " + res.nome + ", agora defina seu acesso:";
                 document.getElementById('reg-linha').value = res.linha;
                 trocarTela('box-finalizar');
             } else {
@@ -91,17 +129,22 @@
         }
 
         async function salvarDados() {
+            const u = document.getElementById('reg-user').value;
+            const s = document.getElementById('reg-pass').value;
+            const l = document.getElementById('reg-linha').value;
+
+            if(!u || !s) return alert("Defina usuário e senha!");
+
             const res = await chamarAPI({
                 action: 'salvar',
-                payload: {
-                    linha: document.getElementById('reg-linha').value,
-                    u: document.getElementById('reg-user').value,
-                    s: document.getElementById('reg-pass').value
-                }
+                payload: { linha: l, u: u, s: s }
             });
+
             if(res.sucesso) {
-                alert(res.msg);
+                alert("Cadastro realizado! Faça login agora.");
                 trocarTela('box-login');
+            } else {
+                alert(res.msg);
             }
         }
     </script>
