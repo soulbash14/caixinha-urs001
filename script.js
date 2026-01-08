@@ -1,27 +1,39 @@
 /**
- * SISTEMA MVC AUTOMÁTICO - urs_001
- * Correção: Modal de erro na recuperação de senha
+ * SISTEMA MVC PROFISSIONAL - urs_001
+ * Configuração: Redeploy Automático e Variáveis de Ambiente
  */
 
 const App = {
-    userGitHub: 'soulbash14', 
-    repoGitHub: 'caixinha-urs001', 
-    apiUrl: null,
+    // A forma certa: Ele tenta ler a variável da Vercel, se for undefined, usa o link reserva.
+    apiUrl: (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_API_URL) 
+            ? process.env.NEXT_PUBLIC_API_URL 
+            : 'https://script.google.com/macros/s/AKfycbzX6Rv-0zJplG_-_6_djYq1aUVSfG5Iw6Dv0HiZPUCmoYhvAurg9ztRqJR1KMizU3tn/exec',
 
-    async obterUrlApi() {
-        if (this.apiUrl) return this.apiUrl;
+    // Controlador de Requisições com Tratamento de Erros Profissional
+    async request(action, payload) {
+        document.getElementById('loader').style.display = 'flex';
+        
         try {
-            const rawUrl = `https://raw.githubusercontent.com/${this.userGitHub}/${this.repoGitHub}/main/url.txt`;
-            const response = await fetch(rawUrl + '?t=' + new Date().getTime());
-            const link = await response.text();
-            this.apiUrl = link.trim();
-            return this.apiUrl;
+            const response = await fetch(this.apiUrl, {
+                method: 'POST',
+                body: JSON.stringify({ action, payload })
+            });
+
+            if (!response.ok) throw new Error("Erro na rede");
+
+            const res = await response.json();
+            return res;
+
         } catch (e) {
-            console.error("Erro URL:", e);
-            return null;
+            console.error("Erro na API:", e);
+            this.aviso("Erro de Conexão", "Não foi possível falar com o servidor. Verifique se o link da API na Vercel está correto.", "error");
+            return { sucesso: false, msg: "Falha na comunicação." };
+        } finally {
+            document.getElementById('loader').style.display = 'none';
         }
     },
 
+    // Notificações SweetAlert2
     aviso(titulo, texto, icone = 'info') {
         Swal.fire({
             title: titulo,
@@ -32,6 +44,7 @@ const App = {
         });
     },
 
+    // Gerenciador de Telas (Views)
     show(id) {
         const views = ['view-login', 'view-cadastro', 'view-finalizar', 'view-esqueci', 'view-dash'];
         views.forEach(v => {
@@ -41,51 +54,33 @@ const App = {
         document.getElementById(id).classList.remove('hidden');
     },
 
-    async request(action, payload) {
-        const url = await this.obterUrlApi();
-        if (!url) return { sucesso: false, msg: "Configuração de API não encontrada." };
-
-        document.getElementById('loader').style.display = 'flex';
-        try {
-            const r = await fetch(url, {
-                method: 'POST',
-                body: JSON.stringify({ action, payload })
-            });
-            return await r.json();
-        } catch (e) {
-            return { sucesso: false, msg: "Servidor fora do ar ou link inválido." };
-        } finally {
-            document.getElementById('loader').style.display = 'none';
-        }
-    },
+    // --- FUNÇÕES CRUD / REGRAS DE NEGÓCIO ---
 
     async login() {
         const u = document.getElementById('user').value;
         const p = document.getElementById('pass').value;
-        if (!u || !p) return this.aviso("Atenção", "Preencha usuário e senha.", "warning");
+        if (!u || !p) return this.aviso("Atenção", "Informe Usuário e Senha.", "warning");
 
         const res = await this.request('login', { user: u, pass: p });
-        if (res.sucesso) {
+        if (res && res.sucesso) {
             document.getElementById('txt-nome').innerText = res.nome;
             document.getElementById('txt-saldo').innerText = "R$ " + res.saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
             this.show('view-dash');
         } else {
-            this.aviso("Erro de Acesso", res.msg, "error");
+            this.aviso("Acesso Negado", res.msg || "Dados inválidos.", "error");
         }
     },
 
     async recuperar() {
         const cpf = document.getElementById('esc-cpf').value;
-        if (!cpf) return this.aviso("Atenção", "Informe o CPF para recuperar.", "warning");
+        if (!cpf) return this.aviso("Atenção", "Digite o CPF.", "warning");
 
         const res = await this.request('esqueciSenha', { cpf: cpf });
-        
-        // CORREÇÃO AQUI: Se for sucesso mostra verde, se não mostra erro
-        if (res.sucesso) {
+        if (res && res.sucesso) {
             this.aviso("Recuperado!", res.msg, "success");
             this.show('view-login');
         } else {
-            this.aviso("Ops!", res.msg, "error");
+            this.aviso("Ops!", res.msg || "CPF não localizado.", "error");
         }
     },
 
@@ -94,12 +89,12 @@ const App = {
         if (!cpf) return this.aviso("Atenção", "Informe o CPF.", "warning");
 
         const res = await this.request('validarCpf', { cpf: cpf });
-        if (res.sucesso) {
-            document.getElementById('msg-boas-vindas').innerText = "Olá " + res.nome + ", crie seu acesso:";
+        if (res && res.sucesso) {
+            document.getElementById('msg-boas-vindas').innerText = "Olá " + res.nome + ", agora crie seu acesso:";
             document.getElementById('reg-linha').value = res.linha;
             this.show('view-finalizar');
         } else {
-            this.aviso("Ops!", res.msg, "error");
+            this.aviso("Erro", res.msg, "error");
         }
     },
 
@@ -108,11 +103,12 @@ const App = {
         const s = document.getElementById('reg-pass').value;
         const l = document.getElementById('reg-linha').value;
 
-        if (!u || !s) return this.aviso("Atenção", "Defina usuário e senha.", "warning");
+        if (!u || !s) return this.aviso("Atenção", "Preencha todos os campos.", "warning");
 
         const res = await this.request('salvar', { linha: l, u: u, s: s });
-        if (res.sucesso) {
-            Swal.fire("Sucesso!", "Pode fazer login agora.", "success").then(() => this.show('view-login'));
+        if (res && res.sucesso) {
+            this.aviso("Sucesso!", "Cadastro concluído! Faça seu login.", "success");
+            this.show('view-login');
         } else {
             this.aviso("Erro", res.msg, "error");
         }
