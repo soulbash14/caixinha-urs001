@@ -3,134 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Caixinha - Samuel</title>
+    <title>Sistema Caixinha - urs_001</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        :root { --primary: #2563eb; --bg: #f8fafc; }
-        body { background-color: var(--bg); font-family: 'Inter', sans-serif; }
-        .auth-card { max-width: 400px; margin: 80px auto; border: none; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        .btn-primary { background-color: var(--primary); border: none; padding: 12px; border-radius: 10px; }
-        .form-control { padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; }
-        #loader-global { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); 
-                         display: none; justify-content: center; align-items: center; z-index: 9999; }
-        .sidebar { width: 260px; height: 100vh; background: #1e293b; color: white; position: fixed; }
-        .main-content { margin-left: 260px; padding: 30px; }
-        @media (max-width: 768px) { .sidebar { display: none; } .main-content { margin-left: 0; } }
+        body { background: #1a202c; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        .card { background: white; color: #333; padding: 30px; border-radius: 20px; width: 100%; max-width: 380px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .hidden { display: none; }
+        .btn-primary { background: #2563eb; width: 100%; padding: 12px; font-weight: bold; border: none; margin-top: 10px; }
+        #loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; justify-content: center; align-items: center; }
     </style>
 </head>
 <body>
+    <div id="loader"><div class="spinner-border text-light"></div></div>
 
-    <div id="loader-global"><div class="spinner-border text-primary"></div></div>
-
-    <div id="view-login" class="container">
-        <div class="card auth-card p-4">
-            <div class="text-center mb-4">
-                <h3 class="fw-bold text-primary">Caixinha urs_001</h3>
-                <p class="text-muted">Entre com suas credenciais</p>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Usuário</label>
-                <input type="text" id="user" class="form-control" placeholder="Seu username">
-            </div>
-            <div class="mb-4">
-                <label class="form-label">Senha</label>
-                <input type="password" id="pass" class="form-control" placeholder="••••••••">
-            </div>
-            <button class="btn btn-primary w-100 mb-3" onclick="handleLogin()">Acessar Sistema</button>
-            <div class="d-flex justify-content-between">
-                <a href="#" class="text-decoration-none small" onclick="switchView('view-cpf')">Primeiro Acesso</a>
-                <a href="#" class="text-decoration-none small text-danger" onclick="handleReset()">Esqueci Senha</a>
-            </div>
-        </div>
-    </div>
-
-    <div id="view-cpf" class="container" style="display:none;">
-        <div class="card auth-card p-4 text-center">
-            <h4 class="fw-bold">Validar Cadastro</h4>
-            <p class="text-muted mb-4">Digite seu CPF para continuar</p>
-            <input type="text" id="cpfInput" class="form-control mb-3" placeholder="000.000.000-00">
-            <button class="btn btn-dark w-100 mb-2" onclick="handleValidarCpf()">Verificar CPF</button>
-            <button class="btn btn-link btn-sm text-muted" onclick="switchView('view-login')">Voltar ao Login</button>
-        </div>
-    </div>
-
-    <div id="view-dash" style="display:none;">
-        <div class="sidebar d-flex flex-column p-3">
-            <h4 class="text-center fw-bold mb-4">CAIXINHA</h4>
+    <div class="card">
+        <div id="box-login">
+            <h2 class="text-primary fw-bold">Login</h2>
+            <p class="text-muted small">Acesse sua conta</p>
+            <input type="text" id="user" class="form-control mb-2" placeholder="Usuário">
+            <input type="password" id="pass" class="form-control mb-3" placeholder="Senha">
+            <button class="btn btn-primary" onclick="fazerLogin()">ENTRAR</button>
             <hr>
-            <nav class="nav flex-column gap-2">
-                <a class="nav-link text-white active" href="#"><i class="bi bi-grid-1x2 me-2"></i> Início</a>
-                <a id="menu-adm" class="nav-link text-warning d-none" href="#"><i class="bi bi-shield-lock me-2"></i> Painel ADM</a>
-            </nav>
-            <button class="btn btn-outline-danger mt-auto" onclick="location.reload()">Sair do Sistema</button>
+            <button class="btn btn-link btn-sm w-100" onclick="trocarTela('box-cadastro')">Primeiro Acesso? Clique aqui</button>
         </div>
-        <div class="main-content">
-            <header class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="fw-bold" id="txt-welcome">Bem-vindo</h2>
-                <div class="badge bg-primary p-2" id="badge-nivel">Membro</div>
-            </header>
-            <div class="row">
-                <div class="col-md-4 mb-4">
-                    <div class="card p-3 border-0 shadow-sm text-center">
-                        <h6 class="text-muted">Saldo Caixinha</h6>
-                        <h3 class="fw-bold text-success">R$ 0,00</h3>
-                    </div>
-                </div>
-            </div>
+
+        <div id="box-cadastro" class="hidden">
+            <h2 class="text-success fw-bold">Cadastro</h2>
+            <p class="text-muted small">Digite seu CPF para validar</p>
+            <input type="text" id="reg-cpf" class="form-control mb-3" placeholder="CPF (apenas números)">
+            <button class="btn btn-success w-100" onclick="validarCPF()">VERIFICAR CPF</button>
+            <button class="btn btn-link btn-sm w-100 mt-2" onclick="trocarTela('box-login')">Voltar ao Login</button>
+        </div>
+
+        <div id="box-finalizar" class="hidden">
+            <h2 class="text-primary fw-bold">Quase lá!</h2>
+            <p id="msg-boas-vindas" class="text-muted small"></p>
+            <input type="hidden" id="reg-linha">
+            <input type="text" id="reg-user" class="form-control mb-2" placeholder="Crie um Usuário">
+            <input type="password" id="reg-pass" class="form-control mb-3" placeholder="Crie uma Senha">
+            <button class="btn btn-primary" onclick="salvarDados()">CONCLUIR CADASTRO</button>
         </div>
     </div>
 
     <script>
-        // --- COLE AQUI A URL DO SEU GOOGLE APPS SCRIPT (IMPLANTADO COMO APP DA WEB) ---
-        const URL_API ='https://script.google.com/macros/s/AKfycbyMyZlCjxCCEgkVomZHfz1BCxmw6sTWyiDmoMWmonsCpQNRsv8nVryCx3g3TU6jDWwY/exec';
+        const API = 'https://script.google.com/macros/s/AKfycbzX6Rv-0zJplG_-_6_djYq1aUVSfG5Iw6Dv0HiZPUCmoYhvAurg9ztRqJR1KMizU3tn/exec';
 
-        function switchView(id) {
-            ['view-login', 'view-cpf', 'view-dash'].forEach(v => document.getElementById(v).style.display = 'none');
-            document.getElementById(id).style.display = 'block';
+        function trocarTela(id) {
+            document.getElementById('box-login').classList.add('hidden');
+            document.getElementById('box-cadastro').classList.add('hidden');
+            document.getElementById('box-finalizar').classList.add('hidden');
+            document.getElementById(id).classList.remove('hidden');
         }
 
-        async function callServer(action, payload) {
-            document.getElementById('loader-global').style.display = 'flex';
+        async function chamarAPI(dados) {
+            document.getElementById('loader').style.display = 'flex';
             try {
-                const response = await fetch(URL_API, {
-                    method: 'POST',
-                    body: JSON.stringify({ action, payload })
-                });
-                const data = await response.json();
-                return data;
-            } catch (error) {
-                alert('Erro na comunicação: ' + error);
+                const response = await fetch(API, { method: 'POST', body: JSON.stringify(dados) });
+                return await response.json();
+            } catch (e) {
+                alert("Erro de conexão!");
+                return { sucesso: false };
             } finally {
-                document.getElementById('loader-global').style.display = 'none';
+                document.getElementById('loader').style.display = 'none';
             }
         }
 
-        async function handleLogin() {
-            const user = document.getElementById('user').value;
-            const pass = document.getElementById('pass').value;
-            const res = await callServer('login', { user, pass });
-            if(res.sucesso) {
-                document.getElementById('txt-welcome').innerText = 'Olá, ' + res.nome;
-                if(res.nivel == 1) document.getElementById('menu-adm').classList.remove('d-none');
-                switchView('view-dash');
-            } else { alert(res.msg); }
+        async function fazerLogin() {
+            const res = await chamarAPI({
+                action: 'login',
+                payload: { user: document.getElementById('user').value, pass: document.getElementById('pass').value }
+            });
+            if(res.sucesso) alert("Bem-vindo, " + res.nome);
+            else alert(res.msg);
         }
 
-        async function handleValidarCpf() {
-            const cpf = document.getElementById('cpfInput').value;
-            const res = await callServer('validarCpf', { cpf });
+        async function validarCPF() {
+            const cpf = document.getElementById('reg-cpf').value;
+            const res = await chamarAPI({ action: 'validarCpf', payload: { cpf: cpf } });
+            
             if(res.sucesso) {
-                const u = prompt("Escolha um Username:");
-                const s = prompt("Escolha uma Senha:");
-                if(u && s) {
-                    const saveRes = await callServer('salvar', { linha: res.linha, u, s });
-                    alert(saveRes.msg);
-                    location.reload();
+                document.getElementById('msg-boas-vindas').innerText = "Olá " + res.nome + ", defina seus dados de acesso:";
+                document.getElementById('reg-linha').value = res.linha;
+                trocarTela('box-finalizar');
+            } else {
+                alert(res.msg);
+            }
+        }
+
+        async function salvarDados() {
+            const res = await chamarAPI({
+                action: 'salvar',
+                payload: {
+                    linha: document.getElementById('reg-linha').value,
+                    u: document.getElementById('reg-user').value,
+                    s: document.getElementById('reg-pass').value
                 }
-            } else { alert(res.msg); }
+            });
+            if(res.sucesso) {
+                alert(res.msg);
+                trocarTela('box-login');
+            }
         }
     </script>
 </body>
 </html>
-
