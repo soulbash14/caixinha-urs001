@@ -1,10 +1,9 @@
-console.log('script carregado');
+console.log('script.js carregado corretamente');
 
 const App = {
   test() {
-    alert('App funcionando');
+    alert('App funcionando!');
   }
 };
 
 window.App = App;
-
