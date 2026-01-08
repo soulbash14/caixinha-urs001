@@ -1,47 +1,69 @@
+/* DESIGN urs_001 - MODERNO */
 body {
-    background: #0f172a;
-    color: white;
+    background: radial-gradient(circle, #1e293b 0%, #0f172a 100%);
+    color: #334155;
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 20px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 .card {
-    background: white;
-    color: #333;
-    border-radius: 20px;
+    background: #ffffff;
+    border-radius: 24px;
     width: 100%;
     max-width: 400px;
-    padding: 30px;
+    padding: 35px;
     border: none;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 .hidden {
     display: none !important;
 }
 
+.form-control {
+    border-radius: 12px;
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 10px;
+    background-color: #f8fafc;
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    border-color: #2563eb;
+}
+
 .btn-primary {
     background: #2563eb;
     border: none;
-    padding: 12px;
+    border-radius: 12px;
+    padding: 14px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-primary:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
 }
 
 #loader {
     display: none;
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.7);
-    z-index: 999;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
     justify-content: center;
     align-items: center;
 }
 
+/* Customização SweetAlert */
 .swal2-popup {
     border-radius: 20px !important;
+    font-family: 'Inter', sans-serif !important;
 }
