@@ -7,7 +7,6 @@ const App = {
             const r = await fetch(this.apiUrl, { method: 'POST', body: JSON.stringify({ action, payload }) });
             return await r.json();
         } catch (e) {
-            this.aviso("Erro", "Falha de conexão", "error");
             return { sucesso: false };
         } finally {
             document.getElementById('loader').style.display = 'none';
@@ -28,9 +27,9 @@ const App = {
         const res = await this.request('login', { user: u, pass: p });
         if (res.sucesso) {
             document.getElementById('txt-nome').innerText = res.nome;
-            document.getElementById('txt-saldo').innerText = "R$ " + res.saldo.toLocaleString('pt-BR');
+            document.getElementById('txt-saldo').innerText = "R$ " + Number(res.saldo).toLocaleString('pt-BR', {minimumFractionDigits:2});
             
-            // Se o nível for 1 (ADM), mostra o menu secreto
+            // Se for ADM (Nível 1), mostra o botão
             if (String(res.nivel) === "1") {
                 document.getElementById('btn-menu-adm').classList.remove('hidden');
             }
@@ -53,12 +52,12 @@ const App = {
             u: document.getElementById('reg-user').value,
             s: document.getElementById('reg-pass').value
         });
-        if (res.sucesso) { this.aviso("Sucesso", res.msg, "success"); this.show('view-login'); }
+        if (res.sucesso) { this.aviso("Sucesso", "Acesso liberado!", "success"); this.show('view-login'); }
     },
 
     async recuperar() {
         const res = await this.request('esqueciSenha', { cpf: document.getElementById('esc-cpf').value });
-        if (res.sucesso) { this.aviso("Recuperado", res.msg, "success"); this.show('view-login'); }
+        if (res.sucesso) { this.aviso("Sua Senha", res.msg, "success"); this.show('view-login'); }
         else { this.aviso("Erro", res.msg, "error"); }
     },
 
@@ -66,9 +65,10 @@ const App = {
         const payload = {
             nome: document.getElementById('adm-nome').value,
             cpf: document.getElementById('adm-cpf').value,
-            nivel: document.getElementById('adm-nivel').value
+            nivel: document.getElementById('adm-nivel').value,
+            saldo: document.getElementById('adm-saldo').value
         };
         const res = await this.request('preCadastrar', payload);
-        if (res.sucesso) { this.aviso("Sucesso", "Membro " + res.id + " cadastrado!", "success"); }
+        if (res.sucesso) { this.aviso("Sucesso", "Membro cadastrado!", "success"); }
     }
 };
